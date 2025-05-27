@@ -1,0 +1,24 @@
+{
+  "id": "dev-1747882634248",
+  "status": "succeeded",
+  "createdAt": "2025-05-22T02:57:14.248Z",
+  "completedAt": "2025-05-22T02:57:14.248Z",
+  "originalPrompt": "dog",
+  "enhancedPrompt": "dog, professional photography, masterful composition, perfect lighting, ultra high definition, extremely detailed, 8k resolution, masterpiece",
+  "imageUrls": [
+    "https://picsum.photos/seed/img1/1024/1024"
+  ],
+  "model": "free-model-advanced",
+  "resolution": "1024x1024",
+  "modelVersion": "minimax/image-01",
+  "input": {
+    "prompt": "dog, professional photography, masterful composition, perfect lighting, ultra high definition, extremely detailed, 8k resolution, masterpiece",
+    "aspect_ratio": "1:1"
+  },
+  "savedAt": "2025-05-22T02:57:14.250Z",
+  "urls": {
+    "stream": "https://stream.replicate.com/mock-stream",
+    "get": "https://api.replicate.com/v1/predictions/mock",
+    "cancel": "https://api.replicate.com/v1/predictions/mock/cancel"
+  }
+}

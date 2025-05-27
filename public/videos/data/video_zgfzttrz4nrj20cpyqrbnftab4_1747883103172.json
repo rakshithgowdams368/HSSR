@@ -1,0 +1,17 @@
+{
+  "id": "zgfzttrz4nrj20cpyqrbnftab4",
+  "status": "succeeded",
+  "createdAt": "2025-05-22T03:01:16.709Z",
+  "completedAt": "2025-05-22T03:04:58.894714283Z",
+  "originalPrompt": "dog running",
+  "enhancedPrompt": "cinematic, dog running, running, high quality, detailed, smooth motion, professional lighting, 4K resolution",
+  "videoUrl": "https://replicate.delivery/yhqm/FtzYAdUn53IoOJUbfYNuueiN7UdOy5mroweQ0BIQA3S0yIeSB/out.mp4",
+  "input": {
+    "prompt": "cinematic, dog running, running, high quality, detailed, smooth motion, professional lighting, 4K resolution"
+  },
+  "metrics": {
+    "predict_time": 38.537957087
+  },
+  "model": "cjwbw/videocrafter",
+  "savedAt": "2025-05-22T03:05:03.173Z"
+}

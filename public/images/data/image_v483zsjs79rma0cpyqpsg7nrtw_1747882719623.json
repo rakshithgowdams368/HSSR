@@ -1,0 +1,29 @@
+{
+  "id": "v483zsjs79rma0cpyqpsg7nrtw",
+  "status": "succeeded",
+  "createdAt": "2025-05-22T02:58:14.97Z",
+  "completedAt": "2025-05-22T02:58:38.214692441Z",
+  "originalPrompt": "dog",
+  "enhancedPrompt": "dog, professional photography, masterful composition, perfect lighting, ultra high definition, extremely detailed, 8k resolution, masterpiece",
+  "imageUrls": [
+    "https://replicate.delivery/xezq/bwhYRmv1yMojBR2KSvej93ksqDfLt9wRcmJF1hjChqbemIeSB/tmp6dprnz5e.jpg"
+  ],
+  "model": "free-model-advanced",
+  "resolution": "1024x1024",
+  "modelVersion": "hidden",
+  "input": {
+    "aspect_ratio": "1:1",
+    "num_outputs": 1,
+    "prompt": "dog, professional photography, masterful composition, perfect lighting, ultra high definition, extremely detailed, 8k resolution, masterpiece"
+  },
+  "metrics": {
+    "image_count": 1,
+    "predict_time": 23.236376997
+  },
+  "savedAt": "2025-05-22T02:58:39.624Z",
+  "urls": {
+    "cancel": "https://api.replicate.com/v1/predictions/v483zsjs79rma0cpyqpsg7nrtw/cancel",
+    "get": "https://api.replicate.com/v1/predictions/v483zsjs79rma0cpyqpsg7nrtw",
+    "stream": "https://stream.replicate.com/v1/files/bcwr-ql2fhybz27ekfi3rle2daj5uayo6mvmhjdekz4udfr5n3rzxm4gq"
+  }
+}
