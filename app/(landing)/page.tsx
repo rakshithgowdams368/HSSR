@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutGrid, 
   Image as ImageIcon, 
@@ -48,7 +47,7 @@ const LandingPage = () => {
   if (!mounted) return null;
 
   // Function to handle sign in click
-  const handleSignInClick = (e) => {
+  const handleSignInClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -62,7 +61,9 @@ const LandingPage = () => {
   // Function to handle welcome popup close
   const handleWelcomeClose = () => {
     setShowWelcome(false);
-    window.location.href = '/dashboard';
+    if (typeof window !== 'undefined') {
+      window.location.href = '/dashboard';
+    }
   };
 
   const features = [
@@ -218,135 +219,66 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Loading Animation */}
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 flex items-center justify-center bg-black/90 z-50"
-          >
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full border-4 border-violet-500/30 border-t-violet-500 animate-spin"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <Sparkles className="w-8 h-8 text-violet-400 animate-pulse" />
-              </div>
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/90 z-50 opacity-0 animate-[fadeIn_0.3s_ease-out_forwards]">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full border-4 border-violet-500/30 border-t-violet-500 animate-spin"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <Sparkles className="w-8 h-8 text-violet-400 animate-pulse" />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
 
       {/* Welcome Popup with Micro-Interactions */}
-      <AnimatePresence>
-        {showWelcome && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black/80 z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-gradient-to-br from-violet-900 to-fuchsia-900 p-8 rounded-xl max-w-md w-full mx-4 relative overflow-hidden"
-              initial={{ scale: 0.8, y: 20, opacity: 0 }}
-              animate={{ 
-                scale: 1, 
-                y: 0, 
-                opacity: 1,
-                transition: { 
-                  type: "spring",
-                  duration: 0.7
-                }
-              }}
-            >
-              {/* Confetti animation */}
-              <div className="absolute inset-0 pointer-events-none">
-                {[...Array(20)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-3 h-3 rounded-full bg-yellow-500"
-                    initial={{ 
-                      top: "0%", 
-                      left: `${Math.random() * 100}%`,
-                      opacity: 1,
-                      scale: 0
-                    }}
-                    animate={{ 
-                      top: `${Math.random() * 100}%`, 
-                      left: `${Math.random() * 100}%`,
-                      opacity: [1, 1, 0],
-                      scale: [0, 1, 1],
-                      transition: { 
-                        duration: 1.5,
-                        delay: Math.random() * 0.5,
-                        repeat: Infinity,
-                        repeatDelay: Math.random() * 3
-                      }
-                    }}
-                    style={{
-                      backgroundColor: `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`
-                    }}
-                  />
-                ))}
-              </div>
-
-              <div className="text-center relative z-10">
-                <motion.div 
-                  className="mb-6 mx-auto w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-full flex items-center justify-center"
-                  initial={{ rotate: -180, scale: 0 }}
-                  animate={{ rotate: 0, scale: 1 }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 200,
-                    delay: 0.2
+      {showWelcome && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 z-50 opacity-0 animate-[fadeIn_0.3s_ease-out_forwards]">
+          <div className="bg-gradient-to-br from-violet-900 to-fuchsia-900 p-8 rounded-xl max-w-md w-full mx-4 relative overflow-hidden opacity-0 animate-[scaleIn_0.7s_ease-out_forwards] transform scale-75">
+            {/* Confetti animation */}
+            <div className="absolute inset-0 pointer-events-none">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-3 h-3 rounded-full animate-[confetti_1.5s_ease-out_infinite]"
+                  style={{
+                    backgroundColor: `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`,
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 0.5}s`
                   }}
-                >
-                  <CheckCircle className="w-8 h-8 text-white" />
-                </motion.div>
+                />
+              ))}
+            </div>
 
-                <motion.h2 
-                  className="text-2xl font-bold mb-2 text-white"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  Congratulations!
-                </motion.h2>
-
-                <motion.p 
-                  className="text-lg mb-4 text-violet-100"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  You are now part of my family
-                </motion.p>
-
-                <motion.div
-                  className="text-xl font-semibold mb-6 bg-gradient-to-r from-violet-200 to-fuchsia-200 text-transparent bg-clip-text"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  Welcome, {user?.firstName || "User"}!
-                </motion.div>
-
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                >
-                  <Button 
-                    onClick={handleWelcomeClose}
-                    className="bg-white text-violet-900 hover:bg-violet-100 transition-all duration-300 font-semibold px-6 py-3 text-lg"
-                  >
-                    Click here
-                  </Button>
-                </motion.div>
+            <div className="text-center relative z-10">
+              <div className="mb-6 mx-auto w-16 h-16 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-full flex items-center justify-center opacity-0 animate-[rotateScale_0.8s_ease-out_0.2s_forwards]">
+                <CheckCircle className="w-8 h-8 text-white" />
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+              <h2 className="text-2xl font-bold mb-2 text-white opacity-0 animate-[slideUp_0.6s_ease-out_0.3s_forwards]">
+                Congratulations!
+              </h2>
+
+              <p className="text-lg mb-4 text-violet-100 opacity-0 animate-[slideUp_0.6s_ease-out_0.4s_forwards]">
+                You are now part of my family
+              </p>
+
+              <div className="text-xl font-semibold mb-6 bg-gradient-to-r from-violet-200 to-fuchsia-200 text-transparent bg-clip-text opacity-0 animate-[slideUp_0.6s_ease-out_0.5s_forwards]">
+                Welcome, {user?.firstName || "User"}!
+              </div>
+
+              <div className="opacity-0 animate-[slideUp_0.6s_ease-out_0.6s_forwards]">
+                <Button 
+                  onClick={handleWelcomeClose}
+                  className="bg-white text-violet-900 hover:bg-violet-100 transition-all duration-300 font-semibold px-6 py-3 text-lg"
+                >
+                  Click here
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="fixed w-full bg-black/80 backdrop-blur-lg z-40 border-b border-white/10">
@@ -379,10 +311,10 @@ const LandingPage = () => {
               >
                 Sign In
               </Button>
-                <Button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90"
-                onClick={handleSignInClick} >
-                  Get Started
-                </Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90"
+                onClick={handleSignInClick}>
+                Get Started
+              </Button>
             </div>
             
             {/* Mobile menu button */}
@@ -398,37 +330,30 @@ const LandingPage = () => {
         </div>
         
         {/* Mobile Navigation */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-black/95 backdrop-blur-lg"
-            >
-              <div className="px-4 pt-2 pb-3 space-y-1">
-                <a href="#features" className="block px-3 py-2 text-gray-300 hover:text-white">Features</a>
-                <a href="#showcase" className="block px-3 py-2 text-gray-300 hover:text-white">Showcase</a>
-                <a href="#pricing" className="block px-3 py-2 text-gray-300 hover:text-white">Pricing</a>
-                <a href="#testimonials" className="block px-3 py-2 text-gray-300 hover:text-white">Testimonials</a>
-                <div className="pt-4 space-y-2">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full text-gray-300 hover:text-white"
-                    onClick={handleSignInClick}
-                  >
-                    Sign In
+        {isMenuOpen && (
+          <div className="md:hidden bg-black/95 backdrop-blur-lg transition-all duration-300">
+            <div className="px-4 pt-2 pb-3 space-y-1">
+              <a href="#features" className="block px-3 py-2 text-gray-300 hover:text-white">Features</a>
+              <a href="#showcase" className="block px-3 py-2 text-gray-300 hover:text-white">Showcase</a>
+              <a href="#pricing" className="block px-3 py-2 text-gray-300 hover:text-white">Pricing</a>
+              <a href="#testimonials" className="block px-3 py-2 text-gray-300 hover:text-white">Testimonials</a>
+              <div className="pt-4 space-y-2">
+                <Button 
+                  variant="ghost" 
+                  className="w-full text-gray-300 hover:text-white"
+                  onClick={handleSignInClick}
+                >
+                  Sign In
+                </Button>
+                <Link href="/sign-up" className="block">
+                  <Button className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500">
+                    Get Started
                   </Button>
-                  <Link href="/sign-up" className="block">
-                    <Button className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500">
-                      Get Started
-                    </Button>
-                  </Link>
-                </div>
+                </Link>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -439,45 +364,26 @@ const LandingPage = () => {
         
         <div className="relative max-w-7xl mx-auto">
           <div className="text-center">
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-5xl md:text-7xl font-bold tracking-tight"
-            >
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight opacity-0 animate-[slideUp_0.8s_ease-out_forwards]">
               Create Anything with
               <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 text-transparent bg-clip-text"> AI</span>
-            </motion.h1>
+            </h1>
             
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mt-6 text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto"
-            >
+            <p className="mt-6 text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto opacity-0 animate-[slideUp_0.8s_ease-out_0.1s_forwards]">
               One platform for generating images, videos, code, audio, and conversations. 
               Powered by state-of-the-art AI models.
-            </motion.p>
+            </p>
             
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
-            >
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-[slideUp_0.8s_ease-out_0.2s_forwards]">
               <Link href="/dashboard">
                 <Button size="lg" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90">
                   Start Creating for Free
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-            </motion.div>
+            </div>
             
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-gray-400"
-            >
+            <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-gray-400 opacity-0 animate-[fadeIn_0.8s_ease-out_0.3s_forwards]">
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-500" />
                 No credit card required
@@ -490,7 +396,7 @@ const LandingPage = () => {
                 <Check className="w-4 h-4 text-green-500" />
                 Cancel anytime
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -509,20 +415,17 @@ const LandingPage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700 hover:border-violet-500/50 transition-all"
+                className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700 hover:border-violet-500/50 transition-all opacity-0 animate-[slideUp_0.6s_ease-out_forwards]"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="w-12 h-12 bg-violet-500/10 rounded-lg flex items-center justify-center mb-4">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-gray-400">{feature.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -590,34 +493,25 @@ const LandingPage = () => {
           
           <div className="max-w-4xl mx-auto">
             <div className="relative">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTestimonial}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-gray-800 p-8 rounded-xl"
-                >
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 bg-violet-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                      {testimonials[activeTestimonial].name.charAt(0)}
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-lg">{testimonials[activeTestimonial].name}</h4>
-                      <p className="text-gray-400">{testimonials[activeTestimonial].role} at {testimonials[activeTestimonial].company}</p>
-                    </div>
+              <div className="bg-gray-800 p-8 rounded-xl transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 bg-violet-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                    {testimonials[activeTestimonial].name.charAt(0)}
                   </div>
-                  <blockquote className="text-xl text-gray-300 mb-6">
-                    "{testimonials[activeTestimonial].content}"
-                  </blockquote>
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
-                    ))}
+                  <div>
+                    <h4 className="font-semibold text-lg">{testimonials[activeTestimonial].name}</h4>
+                    <p className="text-gray-400">{testimonials[activeTestimonial].role} at {testimonials[activeTestimonial].company}</p>
                   </div>
-                </motion.div>
-              </AnimatePresence>
+                </div>
+                <blockquote className="text-xl text-gray-300 mb-6">
+                  &quot;{testimonials[activeTestimonial].content}&quot;
+                </blockquote>
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                  ))}
+                </div>
+              </div>
               
               <div className="flex justify-center gap-2 mt-6">
                 {testimonials.map((_, index) => (
@@ -776,6 +670,62 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Custom CSS animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(20px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        @keyframes scaleIn {
+          from { 
+            opacity: 0; 
+            transform: scale(0.8); 
+          }
+          to { 
+            opacity: 1; 
+            transform: scale(1); 
+          }
+        }
+        
+        @keyframes rotateScale {
+          from { 
+            opacity: 0; 
+            transform: rotate(-180deg) scale(0); 
+          }
+          to { 
+            opacity: 1; 
+            transform: rotate(0deg) scale(1); 
+          }
+        }
+        
+        @keyframes confetti {
+          0% { 
+            opacity: 1; 
+            transform: translateY(0) scale(0); 
+          }
+          50% { 
+            opacity: 1; 
+            transform: translateY(-50px) scale(1); 
+          }
+          100% { 
+            opacity: 0; 
+            transform: translateY(-100px) scale(1); 
+          }
+        }
+      `}</style>
     </div>
   );
 };
