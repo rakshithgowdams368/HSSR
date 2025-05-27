@@ -1,7 +1,7 @@
 // File path: app/(dashboard)/(routes)/video/page.tsx
 "use client";
 
-import * as z from "zod";
+import { z } from "zod";
 import axios from "axios";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -81,9 +81,31 @@ const VideoPage = () => {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success("Link copied to clipboard!");
+  const copyToClipboard = async (text: string) => {
+    try {
+      if (typeof window !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
+        toast.success("Link copied to clipboard!");
+      }
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      toast.error("Failed to copy link");
+    }
+  };
+
+  const handleOpenVideo = (videoUrl: string) => {
+    if (typeof window !== 'undefined') {
+      window.open(videoUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return "Invalid date";
+    }
   };
 
   return (
@@ -180,15 +202,14 @@ const VideoPage = () => {
                     <Copy className="w-3.5 h-3.5 mr-1" />
                     Copy
                   </Button>
-                  <a
-                    href={video}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex h-8 items-center justify-center rounded-md bg-orange-700 px-3 text-xs font-medium text-white shadow transition-colors hover:bg-orange-600"
+                  <Button
+                    onClick={() => handleOpenVideo(video)}
+                    size="sm"
+                    className="h-8 bg-orange-700 hover:bg-orange-600 text-white"
                   >
                     <ExternalLink className="w-3.5 h-3.5 mr-1" />
                     Open
-                  </a>
+                  </Button>
                 </div>
               </div>
               <div className="bg-slate-900/60 p-3 rounded-md text-orange-100 break-all text-sm font-mono">
@@ -199,8 +220,18 @@ const VideoPage = () => {
               </p>
             </div>
 
-            <video controls className="w-full aspect-video rounded-lg border bg-black">
-              <source src={video} />
+            <video 
+              controls 
+              className="w-full aspect-video rounded-lg border bg-black"
+              preload="metadata"
+              onError={(e) => {
+                console.error('Video failed to load:', video);
+                const target = e.target as HTMLVideoElement;
+                target.style.display = 'none';
+              }}
+            >
+              <source src={video} type="video/mp4" />
+              Your browser does not support the video tag.
             </video>
 
             {/* Video Details Card */}
@@ -211,7 +242,7 @@ const VideoPage = () => {
                   <div className="space-y-1">
                     <p className="text-gray-400">Status: <span className="text-white">{videoData.status || "Completed"}</span></p>
                     <p className="text-gray-400">Created: <span className="text-white">
-                      {videoData.created_at ? new Date(videoData.created_at).toLocaleString() : "Now"}
+                      {videoData.created_at ? formatDate(videoData.created_at) : "Now"}
                     </span></p>
                     {videoData.metrics && (
                       <p className="text-gray-400">Generation Time: <span className="text-white">
