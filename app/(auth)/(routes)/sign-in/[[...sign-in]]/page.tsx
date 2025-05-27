@@ -41,14 +41,15 @@ export default function SignInPage() {
           colorInputBackground: "#1f2937",
           colorInputText: "white",
           colorBackground: "#111827",
-          fontFamily: "inter",
+          fontFamily: "Inter", // Fixed: Font family should be capitalized
         },
         layout: {
           socialButtonsPlacement: "top",
           socialButtonsVariant: "blockButton",
-          privacyPageUrl: "/privacy",
-          termsPageUrl: "/terms",
-          helpPageUrl: "/help",
+          // Removed these URLs as they might cause 404 errors if not implemented
+          // privacyPageUrl: "/privacy",
+          // termsPageUrl: "/terms", 
+          // helpPageUrl: "/help",
           logoPlacement: "inside",
           showOptionalFields: true,
         },
