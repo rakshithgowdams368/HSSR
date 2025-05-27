@@ -1,7 +1,7 @@
 // app/(dashboard)/(routes)/audio/page.tsx
 "use client";
 
-import * as z from "zod";
+import { z } from "zod";
 import axios from "axios";
 import { Headphones, Wand2, Sparkles, Info, Download, Music as MusicIcon, Share2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -66,10 +66,26 @@ const AudioPage = () => {
     }
   };
 
-  const copyAudioLink = () => {
+  const copyAudioLink = async () => {
     if (audio) {
-      navigator.clipboard.writeText(audio);
-      toast.success("Audio link copied to clipboard!");
+      try {
+        await navigator.clipboard.writeText(audio);
+        toast.success("Audio link copied to clipboard!");
+      } catch (error) {
+        console.error("Failed to copy to clipboard:", error);
+        toast.error("Failed to copy link");
+      }
+    }
+  };
+
+  const handleDownload = () => {
+    if (audio) {
+      const link = document.createElement('a');
+      link.href = audio;
+      link.download = 'generated-audio.mp3';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -128,7 +144,7 @@ const AudioPage = () => {
               <div>
                 <h4 className="font-bold mb-2">🌈 Emotional Tone</h4>
                 <p className="text-gray-300">
-                  Include the emotional feel you're looking for (relaxing, energetic, etc.).
+                  Include the emotional feel you&apos;re looking for (relaxing, energetic, etc.).
                 </p>
               </div>
               <div>
@@ -154,7 +170,7 @@ const AudioPage = () => {
 
           <button 
             type="submit" 
-            className="col-span-2 bg-gradient-to-r from-emerald-500 to-green-500 text-white p-3 rounded-lg flex items-center justify-center"
+            className="col-span-2 bg-gradient-to-r from-emerald-500 to-green-500 text-white p-3 rounded-lg flex items-center justify-center disabled:opacity-50"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -176,6 +192,7 @@ const AudioPage = () => {
                 key={index}
                 onClick={() => form.setValue('prompt', example)}
                 className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-full text-sm"
+                disabled={isLoading}
               >
                 {example}
               </button>
@@ -203,6 +220,7 @@ const AudioPage = () => {
                 controls 
                 className="w-full mb-4"
                 src={audio}
+                preload="metadata"
               >
                 Your browser does not support the audio element.
               </audio>
@@ -222,7 +240,7 @@ const AudioPage = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <button 
-                  onClick={() => window.open(audio, '_blank')}
+                  onClick={handleDownload}
                   className="bg-gradient-to-r from-emerald-500 to-green-500 text-white p-3 rounded-lg flex items-center justify-center"
                 >
                   <Download className="mr-2" size={20} />
