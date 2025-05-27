@@ -13,8 +13,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: "NexusAI - AI-Powered Content Generation Platform",
   description: "Create stunning images, videos, code, audio, and have intelligent conversations with advanced AI models.",
-  title: "NexusAI - AI-Powered Content Generation Platform",
-  description: "Create stunning images, videos, code, audio, and have intelligent conversations with advanced AI models.",
   keywords: ["AI", "Content Generation", "DALL-E", "Gemini", "ChatGPT", "NexusAI"],
   authors: [{ name: "NexusAI Team" }],
   creator: "NexusAI",
@@ -51,7 +49,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Fix: Move viewport and themeColor here
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
