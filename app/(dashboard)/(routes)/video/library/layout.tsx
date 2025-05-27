@@ -1,5 +1,5 @@
 // File path: app/(dashboard)/(routes)/video/library/layout.tsx
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export default async function VideoLibraryLayout({
