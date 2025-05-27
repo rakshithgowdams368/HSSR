@@ -47,6 +47,21 @@ const VideoLibraryPage = () => {
     fetchVideos();
   }, []);
 
+  const handleViewFullSize = (videoUrl: string) => {
+    if (typeof window !== 'undefined') {
+      window.open(videoUrl, "_blank");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "MMM d, yyyy");
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return "Invalid date";
+    }
+  };
+
   return (
     <div>
       <div className="mb-8 flex items-center justify-between px-4 lg:px-8">
@@ -101,8 +116,15 @@ const VideoLibraryPage = () => {
                   <video 
                     className="w-full h-full object-cover rounded-t-lg"
                     controls
+                    preload="metadata"
+                    onError={(e) => {
+                      console.error('Video failed to load:', video.videoUrl);
+                      const target = e.target as HTMLVideoElement;
+                      target.style.display = 'none';
+                    }}
                   >
                     <source src={video.videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
                   </video>
                   <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs flex items-center">
                     <Clock className="w-3 h-3 mr-1" />
@@ -112,7 +134,7 @@ const VideoLibraryPage = () => {
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-white line-clamp-1">{video.prompt}</h3>
                   <div className="mt-2 text-xs text-gray-400">
-                    {video.createdAt ? format(new Date(video.createdAt), "MMM d, yyyy") : ""}
+                    {video.createdAt ? formatDate(video.createdAt) : "Unknown date"}
                     {" • "}{video.metadata?.resolution || "576x320"}
                     {" • "}{video.metadata?.fps || 8}fps
                   </div>
@@ -122,7 +144,7 @@ const VideoLibraryPage = () => {
                     variant="secondary" 
                     size="sm" 
                     className="w-full"
-                    onClick={() => window.open(video.videoUrl, "_blank")}
+                    onClick={() => handleViewFullSize(video.videoUrl)}
                   >
                     View Full Size
                   </Button>
