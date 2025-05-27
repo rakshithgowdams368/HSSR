@@ -1,7 +1,7 @@
 // app/(dashboard)/(routes)/code/page.tsx
 "use client";
 
-import * as z from "zod";
+import { z } from "zod";
 import axios from "axios";
 import { 
   Code, 
@@ -82,14 +82,23 @@ const CodePage = () => {
   }, [currentSession?.messages]);
 
   useEffect(() => {
-    const savedSessions = localStorage.getItem('code-sessions');
-    if (savedSessions) {
-      setSessions(JSON.parse(savedSessions));
+    // Only access localStorage on client side
+    if (typeof window !== 'undefined') {
+      const savedSessions = localStorage.getItem('code-sessions');
+      if (savedSessions) {
+        try {
+          setSessions(JSON.parse(savedSessions));
+        } catch (error) {
+          console.error('Failed to parse saved sessions:', error);
+          localStorage.removeItem('code-sessions');
+        }
+      }
     }
   }, []);
 
   useEffect(() => {
-    if (sessions.length > 0) {
+    // Only save to localStorage on client side
+    if (typeof window !== 'undefined' && sessions.length > 0) {
       localStorage.setItem('code-sessions', JSON.stringify(sessions));
     }
   }, [sessions]);
@@ -107,7 +116,7 @@ const CodePage = () => {
   };
 
   const deleteSession = (sessionId: string) => {
-    if (window.confirm('Are you sure you want to delete this session?')) {
+    if (typeof window !== 'undefined' && window.confirm('Are you sure you want to delete this session?')) {
       setSessions(prev => prev.filter(s => s.id !== sessionId));
       if (currentSessionId === sessionId) {
         setCurrentSessionId(null);
@@ -131,11 +140,18 @@ const CodePage = () => {
     setEditingSessionId(null);
   };
 
-  const copyToClipboard = (code: string, index: number) => {
-    navigator.clipboard.writeText(code);
-    setCopiedIndex(index);
-    toast.success("Code copied to clipboard");
-    setTimeout(() => setCopiedIndex(null), 2000);
+  const copyToClipboard = async (code: string, index: number) => {
+    try {
+      if (typeof window !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(code);
+        setCopiedIndex(index);
+        toast.success("Code copied to clipboard");
+        setTimeout(() => setCopiedIndex(null), 2000);
+      }
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      toast.error("Failed to copy code");
+    }
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -164,6 +180,10 @@ const CodePage = () => {
       setIsLoading(true);
       setShowSlowWarning(false);
 
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       timeoutRef.current = setTimeout(() => {
         setShowSlowWarning(true);
       }, 5000);
@@ -173,7 +193,9 @@ const CodePage = () => {
         messages: [...currentMessages, userMessage],
       });
 
-      clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -204,7 +226,9 @@ const CodePage = () => {
     } finally {
       setIsLoading(false);
       setShowSlowWarning(false);
-      clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       router.refresh();
     }
   };
@@ -227,7 +251,7 @@ const CodePage = () => {
         {isOpen && (
           <>
             <div 
-              className="fixed inset-0 z-50"
+              className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
             />
             <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg border border-gray-700 z-50">
@@ -391,7 +415,7 @@ const CodePage = () => {
                           <ReactMarkdown
                             className="prose prose-invert prose-sm max-w-none"
                             components={{
-                              pre: ({ node, children, ...props }) => {
+                              pre: ({ children, ...props }) => {
                                 return (
                                   <pre className="relative my-4" {...props}>
                                     <div className="absolute top-2 right-2 flex gap-2 z-10">
@@ -417,7 +441,7 @@ const CodePage = () => {
                                   </pre>
                                 );
                               },
-                              code: ({ node, inline, className, children, ...props }) => {
+                              code: ({ inline, className, children, ...props }) => {
                                 return inline ? (
                                   <code className="bg-gray-800 px-1 py-0.5 rounded text-sm" {...props}>
                                     {children}
@@ -501,7 +525,7 @@ const CodePage = () => {
                   <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-600 to-emerald-600 opacity-20 blur-xl animate-pulse"></div>
                   
                   {/* Rotating logo container */}
-                  <div className="relative w-full h-full animate-[spin_10s_linear_infinite]">
+                  <div className="relative w-full h-full animate-spin" style={{ animationDuration: '10s' }}>
                     <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-600 to-emerald-600 p-0.5">
                       <div className="w-full h-full rounded-full bg-gray-950 flex items-center justify-center">
                         <Code className="w-16 h-16 text-green-500" />
@@ -510,7 +534,7 @@ const CodePage = () => {
                   </div>
                   
                   {/* Orbiting icons */}
-                  <div className="absolute inset-0 animate-[spin_15s_linear_infinite]">
+                  <div className="absolute inset-0 animate-spin" style={{ animationDuration: '15s' }}>
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
                       <div className="p-2 bg-gray-900 rounded-full border border-green-500/20">
                         <Terminal className="w-4 h-4 text-green-400" />
@@ -597,18 +621,6 @@ const CodePage = () => {
           </div>
         )}
       </div>
-
-      {/* Custom animations */}
-      <style jsx global>{`
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
     </div>
   );
 };
