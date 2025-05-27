@@ -1,13 +1,12 @@
 // app/(dashboard)/(routes)/music/page.tsx
 "use client";
 
-import * as z from "zod";
+import { z } from "zod";
 import axios from "axios";
 import { useState, useRef, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Music,
   Wand2,
@@ -44,8 +43,6 @@ import { Loader } from "@/components/loader";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
-// Temporarily comment out Slider to test
-// import { Slider } from "@/components/ui/slider";
 
 import { formSchema } from "./constants";
 
@@ -60,6 +57,7 @@ const MusicPage = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -70,6 +68,10 @@ const MusicPage = () => {
   });
 
   const isLoading = form.formState.isSubmitting;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Quick prompts for instant inspiration
   const quickPrompts = [
@@ -83,18 +85,21 @@ const MusicPage = () => {
 
   // Audio control functions
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && mounted) {
       audioRef.current.volume = volume;
       audioRef.current.loop = isLooping;
     }
-  }, [volume, isLooping]);
+  }, [volume, isLooping, mounted]);
 
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(error => {
+          console.error('Audio play failed:', error);
+          toast.error('Failed to play audio');
+        });
       }
       setIsPlaying(!isPlaying);
     }
@@ -129,6 +134,7 @@ const MusicPage = () => {
   };
 
   const formatTime = (time: number) => {
+    if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -156,7 +162,7 @@ const MusicPage = () => {
   };
 
   const downloadMusic = () => {
-    if (music) {
+    if (music && typeof window !== 'undefined') {
       const link = document.createElement('a');
       link.href = music;
       link.download = `generated-music-${Date.now()}.mp3`;
@@ -167,6 +173,8 @@ const MusicPage = () => {
     }
   };
 
+  if (!mounted) return null;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black">
       {/* Hero Section */}
@@ -174,11 +182,7 @@ const MusicPage = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 via-transparent to-cyan-600/20 blur-3xl" />
 
         <div className="relative px-4 sm:px-6 lg:px-8 py-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4 mb-8"
-          >
+          <div className="flex items-center gap-4 mb-8 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]">
             <div className="relative">
               <div className="absolute inset-0 bg-emerald-500 blur-xl opacity-50 animate-pulse" />
               <div className="relative bg-gradient-to-br from-emerald-500 to-cyan-600 p-4 rounded-2xl">
@@ -191,25 +195,18 @@ const MusicPage = () => {
               </h1>
               <p className="text-gray-400 mt-1">Create unique melodies with AI</p>
             </div>
-          </motion.div>
+          </div>
 
           {/* Quick Prompts */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mb-8"
-          >
+          <div className="mb-8 opacity-0 animate-[fadeInUp_0.6s_ease-out_0.1s_forwards]">
             <h3 className="text-sm font-medium text-gray-400 mb-3">Quick Start</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {quickPrompts.map((prompt, index) => (
-                <motion.button
+                <button
                   key={prompt.label}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
                   onClick={() => form.setValue('prompt', prompt.prompt)}
-                  className="flex items-center gap-3 p-3 bg-gray-900/50 backdrop-blur-sm rounded-lg border border-gray-800 hover:border-emerald-500/50 transition-all group"
+                  className="flex items-center gap-3 p-3 bg-gray-900/50 backdrop-blur-sm rounded-lg border border-gray-800 hover:border-emerald-500/50 transition-all group opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]"
+                  style={{ animationDelay: `${index * 0.1 + 0.2}s` }}
                 >
                   <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 group-hover:bg-emerald-500/20">
                     <prompt.icon className="w-5 h-5" />
@@ -218,10 +215,10 @@ const MusicPage = () => {
                     <p className="text-sm font-medium text-gray-300">{prompt.label}</p>
                     <p className="text-xs text-gray-500 truncate">{prompt.prompt}</p>
                   </div>
-                </motion.button>
+                </button>
               ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Main Form */}
           <Form {...form}>
@@ -251,7 +248,7 @@ const MusicPage = () => {
                     )}
                   />
 
-                  {/* Advanced Settings (placeholder for future) */}
+                  {/* Advanced Settings */}
                   <button
                     type="button"
                     onClick={() => setShowAdvanced(!showAdvanced)}
@@ -259,25 +256,17 @@ const MusicPage = () => {
                   >
                     <Sliders className="w-4 h-4" />
                     Advanced Settings
-                    <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showAdvanced ? 'rotate-180' : ''}`} />
                   </button>
 
-                  <AnimatePresence>
-                    {showAdvanced && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="bg-gray-800/50 rounded-lg p-4 space-y-4 overflow-hidden"
-                      >
-                        <div className="flex items-center gap-2 text-gray-400">
-                          <Info className="w-4 h-4" />
-                          <p className="text-sm">Advanced settings coming soon...</p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {showAdvanced && (
+                    <div className="bg-gray-800/50 rounded-lg p-4 space-y-4 transition-all duration-300">
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <Info className="w-4 h-4" />
+                        <p className="text-sm">Advanced settings coming soon...</p>
+                      </div>
+                    </div>
+                  )}
 
                   <Button
                     className="w-full bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white py-6 text-lg"
@@ -307,41 +296,29 @@ const MusicPage = () => {
       <div className="px-4 sm:px-6 lg:px-8 py-8">
         {/* Loading State */}
         {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-20"
-          >
+          <div className="flex flex-col items-center justify-center py-20 opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]">
             <div className="relative">
               <div className="w-20 h-20 border-4 border-emerald-500/20 rounded-full animate-spin border-t-emerald-500" />
               <Music className="w-10 h-10 text-emerald-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
             <p className="mt-4 text-gray-400">Composing your melody...</p>
-          </motion.div>
+          </div>
         )}
 
         {/* Empty State */}
         {!music && !isLoading && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-20"
-          >
+          <div className="text-center py-20 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]">
             <div className="w-20 h-20 mx-auto bg-gray-900/50 rounded-full flex items-center justify-center mb-4">
               <Music className="w-10 h-10 text-gray-500" />
             </div>
             <h3 className="text-xl font-semibold text-gray-300 mb-2">No music yet</h3>
             <p className="text-gray-500 mb-8">Enter a prompt above to generate your first track</p>
-          </motion.div>
+          </div>
         )}
 
         {/* Music Player */}
         {music && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl mx-auto"
-          >
+          <div className="max-w-3xl mx-auto opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]">
             <Card className="bg-gray-900/50 backdrop-blur-sm border-gray-800 p-6 sm:p-8">
               <audio
                 ref={audioRef}
@@ -379,7 +356,7 @@ const MusicPage = () => {
               {/* Track Info */}
               <div className="mb-6 text-center">
                 <h3 className="text-xl font-semibold text-white mb-2">AI Generated Track</h3>
-                <p className="text-gray-400">Based on: "{form.getValues('prompt') || 'Custom prompt'}"</p>
+                <p className="text-gray-400">Based on: &quot;{form.getValues('prompt') || 'Custom prompt'}&quot;</p>
               </div>
 
               {/* Progress Bar */}
@@ -389,7 +366,7 @@ const MusicPage = () => {
               >
                 <div
                   className="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full rounded-full relative"
-                  style={{ width: `${(currentTime / duration) * 100}%` }}
+                  style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                 >
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
@@ -405,7 +382,7 @@ const MusicPage = () => {
               <div className="flex items-center justify-center gap-4 mb-6">
                 <button
                   className="p-2 text-gray-400 hover:text-white transition-colors"
-                  onClick={() => audioRef.current && (audioRef.current.currentTime -= 10)}
+                  onClick={() => audioRef.current && (audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10))}
                 >
                   <SkipBack className="w-5 h-5" />
                 </button>
@@ -423,7 +400,7 @@ const MusicPage = () => {
 
                 <button
                   className="p-2 text-gray-400 hover:text-white transition-colors"
-                  onClick={() => audioRef.current && (audioRef.current.currentTime += 10)}
+                  onClick={() => audioRef.current && (audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 10))}
                 >
                   <SkipForward className="w-5 h-5" />
                 </button>
@@ -438,22 +415,23 @@ const MusicPage = () => {
                   >
                     {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                   </button>
-                  {/* Temporarily replaced with a simple div 
-                  <Slider
-                    value={[isMuted ? 0 : volume * 100]}
-                    max={100}
-                    step={1}
-                    onValueChange={(values) => {
-                      const newVolume = values[0] / 100;
-                      setVolume(newVolume);
-                      if (audioRef.current) {
-                        audioRef.current.volume = newVolume;
-                      }
-                    }}
-                    className="w-32"
-                  />
-                  */}
-                  <div className="w-32 h-2 bg-gray-800 rounded-full" />
+                  <div className="w-32 h-2 bg-gray-800 rounded-full cursor-pointer" onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const percentage = x / rect.width;
+                    const newVolume = Math.max(0, Math.min(1, percentage));
+                    setVolume(newVolume);
+                    if (audioRef.current) {
+                      audioRef.current.volume = newVolume;
+                      setIsMuted(false);
+                      audioRef.current.muted = false;
+                    }
+                  }}>
+                    <div 
+                      className="h-full bg-emerald-500 rounded-full"
+                      style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -498,14 +476,33 @@ const MusicPage = () => {
                   variant="secondary"
                   className="bg-gray-800 hover:bg-gray-700 text-white"
                 >
-                  <Share2 className="w-4 h-4 mr-2" />
+                  <Share2 className="w-4 w-4 mr-2" />
                   Share
                 </Button>
               </div>
             </Card>
-          </motion.div>
+          </div>
         )}
       </div>
+
+      {/* Custom CSS animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(20px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+      `}</style>
     </div>
   );
 };
