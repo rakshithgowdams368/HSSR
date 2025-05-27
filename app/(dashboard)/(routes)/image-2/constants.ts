@@ -1,5 +1,5 @@
 // app/(dashboard)/(routes)/image-2/constants.ts
-import * as z from "zod";
+import { z } from "zod";
 
 export const formSchema = z.object({
   prompt: z.string().min(1, {
