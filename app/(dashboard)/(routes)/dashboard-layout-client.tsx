@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 import MobileSidebar from "@/components/mobile-sidebar";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DashboardLayoutClient = ({ children }: { children: React.ReactNode }) => {
@@ -56,8 +56,9 @@ const DashboardLayoutClient = ({ children }: { children: React.ReactNode }) => {
             variant="ghost"
             size="icon"
             onClick={() => setIsSidebarOpen(false)}
+            className="text-white hover:bg-gray-800"
           >
-            <span className="text-white">✕</span>
+            <X className="h-4 w-4" />
           </Button>
         </div>
         <Sidebar />
