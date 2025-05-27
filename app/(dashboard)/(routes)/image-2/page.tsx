@@ -1,3 +1,4 @@
+// app/(dashboard)/(routes)/image-2/page.tsx
 "use client";
 
 import { useState, FormEvent } from "react";
@@ -39,14 +40,20 @@ export default function ImageGeneration2Page() {
   const [prompt, setPrompt] = useState("");
   const [amount, setAmount] = useState("1");
   const [resolution, setResolution] = useState("1024x1024");
-  const [model, setModel] = useState("free-model-basic");
+  const [model, setModel] = useState("free-model-advanced");
   const [promptError, setPromptError] = useState("");
 
   // Function to copy to clipboard
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyToClipboard = async (text: string) => {
+    try {
+      if (typeof window !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
   };
 
   // Handle form submission
@@ -296,7 +303,11 @@ export default function ImageGeneration2Page() {
               </div>
               <CardFooter className="p-2 flex flex-col gap-2">
                 <Button
-                  onClick={() => window.open(src, "_blank")}
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.open(src, "_blank");
+                    }
+                  }}
                   variant="secondary"
                   className="w-full"
                 >
@@ -359,7 +370,11 @@ export default function ImageGeneration2Page() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(debug.output[0], '_blank')}
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          window.open(debug.output[0], '_blank');
+                        }
+                      }}
                       className="flex items-center gap-1"
                     >
                       <ExternalLink className="h-4 w-4" />
@@ -370,7 +385,11 @@ export default function ImageGeneration2Page() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(debug.urls.stream, '_blank')}
+                        onClick={() => {
+                          if (typeof window !== 'undefined') {
+                            window.open(debug.urls.stream, '_blank');
+                          }
+                        }}
                         className="flex items-center gap-1"
                       >
                         <ExternalLink className="h-4 w-4" />
@@ -378,12 +397,9 @@ export default function ImageGeneration2Page() {
                       </Button>
                     )}
                   </div>
-                  <br />
                 </div>
-                <br />
               </div>
             </Card>
-            <br />
           </div>
         )}
       </div>
