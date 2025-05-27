@@ -1,5 +1,5 @@
 // File path: app/(dashboard)/layout.tsx
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import DashboardLayoutClient from "./dashboard-layout-client";
 
