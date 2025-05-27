@@ -1,7 +1,7 @@
 // app/(dashboard)/(routes)/conversation/page.tsx
 "use client";
 
-import * as z from "zod";
+import { z } from "zod";
 import axios from "axios";
 import { 
   MessageSquare, 
@@ -78,16 +78,23 @@ const ConversationPage = () => {
   }, [currentChat?.messages]);
 
   useEffect(() => {
-    // Load chats from localStorage
-    const savedChats = localStorage.getItem('ai-chats');
-    if (savedChats) {
-      setChats(JSON.parse(savedChats));
+    // Only access localStorage on client side
+    if (typeof window !== 'undefined') {
+      const savedChats = localStorage.getItem('ai-chats');
+      if (savedChats) {
+        try {
+          setChats(JSON.parse(savedChats));
+        } catch (error) {
+          console.error('Failed to parse saved chats:', error);
+          localStorage.removeItem('ai-chats');
+        }
+      }
     }
   }, []);
 
   useEffect(() => {
-    // Save chats to localStorage
-    if (chats.length > 0) {
+    // Only save to localStorage on client side
+    if (typeof window !== 'undefined' && chats.length > 0) {
       localStorage.setItem('ai-chats', JSON.stringify(chats));
     }
   }, [chats]);
@@ -105,7 +112,7 @@ const ConversationPage = () => {
   };
 
   const deleteChat = (chatId: string) => {
-    if (window.confirm('Are you sure you want to delete this chat?')) {
+    if (typeof window !== 'undefined' && window.confirm('Are you sure you want to delete this chat?')) {
       setChats(prev => prev.filter(chat => chat.id !== chatId));
       if (currentChatId === chatId) {
         setCurrentChatId(null);
@@ -157,6 +164,11 @@ const ConversationPage = () => {
       setIsLoading(true);
       setShowSlowWarning(false);
 
+      // Clear existing timeout if any
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       // Set timeout for slow response warning
       timeoutRef.current = setTimeout(() => {
         setShowSlowWarning(true);
@@ -167,7 +179,9 @@ const ConversationPage = () => {
         messages: [...currentMessages, userMessage],
       });
 
-      clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -199,7 +213,9 @@ const ConversationPage = () => {
     } finally {
       setIsLoading(false);
       setShowSlowWarning(false);
-      clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       router.refresh();
     }
   };
@@ -223,7 +239,7 @@ const ConversationPage = () => {
         {isOpen && (
           <>
             <div 
-              className="fixed inset-0 z-50"
+              className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
             />
             <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg border border-gray-700 z-50">
@@ -470,7 +486,7 @@ const ConversationPage = () => {
                   <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20 blur-xl animate-pulse"></div>
                   
                   {/* Rotating logo container */}
-                  <div className="relative w-full h-full animate-[spin_10s_linear_infinite]">
+                  <div className="relative w-full h-full animate-spin" style={{ animationDuration: '10s' }}>
                     <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 p-0.5">
                       <div className="w-full h-full rounded-full bg-gray-950 flex items-center justify-center">
                         <Bot className="w-16 h-16 text-violet-500" />
@@ -479,7 +495,7 @@ const ConversationPage = () => {
                   </div>
                   
                   {/* Orbiting icons */}
-                  <div className="absolute inset-0 animate-[spin_15s_linear_infinite]">
+                  <div className="absolute inset-0 animate-spin" style={{ animationDuration: '15s' }}>
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
                       <div className="p-2 bg-gray-900 rounded-full border border-violet-500/20">
                         <Brain className="w-4 h-4 text-violet-400" />
@@ -506,7 +522,7 @@ const ConversationPage = () => {
 
               {/* Welcome Text */}
               <h1 className="text-3xl sm:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-indigo-500">
-                Welcome to 5ModleAI Chat
+                Welcome to 5ModelAI Chat
               </h1>
               
               <p className="text-xl text-gray-300 mb-8">
@@ -566,18 +582,6 @@ const ConversationPage = () => {
           </div>
         )}
       </div>
-
-      {/* Custom animations */}
-      <style jsx global>{`
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
     </div>
   );
 };
